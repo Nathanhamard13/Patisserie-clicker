@@ -5,7 +5,7 @@
 // ============================================================
 
 const PALIERS = [
-  { seuil: 0,       nom: "Pâtisserie de quartier", image: "assets/img/gateaum.png",          accent: "#c97b8f", accentDark: "#a85e72", accentLight: "#f5dde3", fond: "assets/img/fond-patisserie.jpg" },
+  { seuil: 0,       nom: "Pâtisserie de quartier", image: "assets/img/gateaum.png",          accent: "#c97b8f", accentDark: "#a85e72", accentLight: "#f5dde3", fond: "assets/img/fond-palier.jpg" },
   { seuil: 1000,    nom: "Salon de thé",           image: "assets/img/gateau-palier2.png",    accent: "#7a9484", accentDark: "#5e7868", accentLight: "#d5e8e0", fond: "assets/img/fond-palier2.jpg"   },
   { seuil: 10000,   nom: "Boulangerie réputée",    image: "assets/img/gateau-palier3.png",    accent: "#b8956a", accentDark: "#8f6e47", accentLight: "#f0e0cc", fond: "assets/img/fond-palier3.jpg"   },
   { seuil: 100000,  nom: "Empire pâtissier",       image: "assets/img/gateau-palier4.png",    accent: "#8b3a4e", accentDark: "#6d2037", accentLight: "#f0c8d0", fond: "assets/img/fond-palier4.jpg"   },
