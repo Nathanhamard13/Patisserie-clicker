@@ -1,0 +1,601 @@
+/* ===== Reset & Variables ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:           #fdfaf6;
+  --text:         #3a322d;
+  --text-muted:   #8c7b73;
+  --accent:       #c97b8f;
+  --accent-light: #f5dde3;
+  --accent-dark:  #a85e72;
+  --card-bg:      rgba(255, 255, 255, 0.87);
+  --border:       rgba(237, 228, 222, 0.95);
+  --shadow:       0 2px 16px rgba(58, 38, 30, 0.1);
+  --radius:       18px;
+  --radius-sm:    10px;
+}
+
+/* ===== Base — 100 vh, pas de scroll ===== */
+html, body { height: 100%; }
+
+body {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background-color: var(--bg);
+}
+
+/* Deux calques de fond superposés, injectés par JS — crossfade entre paliers */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  pointer-events: none;
+}
+
+/* Voile crème pour lisibilité sur fond illustré */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgba(253, 250, 246, 0.55);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ===== Conteneur principal ===== */
+.layout {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0.6rem 1.25rem 0.7rem;
+  gap: 0.6rem;
+}
+
+/* ===== En-tête ===== */
+header {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-shadow: 0 1px 6px rgba(253, 250, 246, 0.7);
+}
+
+/* ===== Grille 3 colonnes ===== */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 1rem;
+}
+
+/* ===== Panneau gauche — Stats live ===== */
+.panel-left {
+  min-height: 0;
+  overflow: hidden;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.panel-title {
+  font-family: 'Fraunces', serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stats-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.stat-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  transition: color 0.5s ease;
+}
+
+/* ===== Colonne centrale ===== */
+.center-col {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Score card */
+.score-card {
+  flex-shrink: 0;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.55rem 2.25rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+}
+
+.score-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+#affichage {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent-dark);
+  transition: color 0.5s ease;
+}
+
+/* Nom du palier sous le score */
+.palier-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  transition: color 0.5s ease;
+}
+
+/* Zone gâteau — remplit l'espace restant, accueille les curseurs orbitaux */
+.click-zone {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Bouton gâteau : transparent, aucun fond, aucune bordure */
+.cake-button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+  outline-offset: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.cake-button img {
+  display: block;
+  height: min(240px, 38dvh);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 10px 28px rgba(58, 38, 30, 0.2));
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.cake-button:hover { transform: scale(1.04); }
+
+/* Animation clic */
+#clic.clicked { animation: cakeClick 0.22s ease forwards; }
+
+@keyframes cakeClick {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(0.87) rotate(-1.5deg); }
+  65%  { transform: scale(1.05) rotate(0.6deg); }
+  100% { transform: scale(1); }
+}
+
+/* Transition d'image au changement de palier */
+.cake-transition-out {
+  opacity: 0 !important;
+  transform: scale(0.88) !important;
+}
+
+.cake-transition-in {
+  animation: cakeFadeIn 0.3s ease forwards;
+}
+
+@keyframes cakeFadeIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ===== Curseurs orbitaux ===== */
+.cursor-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+  animation: rotate-orbit 8s linear infinite;
+}
+
+@keyframes rotate-orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.cursor-hand {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  transform: translate(105px, -26px);
+  pointer-events: none;
+  transition: transform 0.08s ease;
+}
+
+.cursor-hand.cursor-clicking {
+  transform: translate(105px, -26px) scale(0.78);
+}
+
+/* ===== Satellites (animations selon upgrades) ===== */
+.satellites {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Usines — arrière-plan flouté, légèrement tremblant */
+.usine-sat {
+  position: absolute;
+  bottom: 0;
+  width: 120px;
+  height: auto;
+  opacity: 0.25;
+  filter: blur(2px);
+  transform-origin: center bottom;
+  z-index: 0;
+}
+
+.usine-sat.usine-shake { animation: usineShake 0.5s ease; }
+
+@keyframes usineShake {
+  0%, 100% { transform: translateX(0)    rotate(0); }
+  25%      { transform: translateX(-2px) rotate(-1deg); }
+  50%      { transform: translateX(2px)  rotate(1deg); }
+  75%      { transform: translateX(-2px) rotate(-1deg); }
+}
+
+/* Fours — bas droite + fumée qui monte */
+.four-wrap {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 1;
+}
+
+.four-sat { position: relative; width: 56px; }
+.four-sat img { display: block; width: 56px; height: auto; }
+
+.smoke {
+  position: absolute;
+  bottom: 72%;
+  width: 9px;
+  height: 9px;
+  background: rgba(180, 170, 165, 0.5);
+  border-radius: 50%;
+  animation: smokeRise 3s linear infinite;
+}
+
+@keyframes smokeRise {
+  0%   { opacity: 0;   transform: translateY(0)     scale(0.5); }
+  25%  { opacity: 0.6; }
+  100% { opacity: 0;   transform: translateY(-42px) scale(1.4); }
+}
+
+/* Boulangeries — bas gauche */
+.boul-wrap {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 1;
+}
+
+.boulangerie-sat { display: block; width: 56px; height: auto; }
+
+/* Apprentis — orbite extérieure, sens anti-horaire */
+.apprenti-orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+  animation: rotate-orbit-reverse 12s linear infinite;
+}
+
+@keyframes rotate-orbit-reverse {
+  from { transform: rotate(360deg); }
+  to   { transform: rotate(0deg); }
+}
+
+.apprenti-hand {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  transform: translate(155px, -14px);
+  pointer-events: none;
+  transition: transform 0.08s ease;
+}
+
+.apprenti-hand.cursor-clicking {
+  transform: translate(155px, -14px) scale(0.8);
+}
+
+/* "+N" doré des boulangeries */
+.float-kaching {
+  position: absolute;
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #d4a017;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: floatUp 1s ease forwards;
+}
+
+/* ===== Boutique ===== */
+.shop {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.shop h2 {
+  flex-shrink: 0;
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+#shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+/* Cards d'upgrade */
+.card {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--card-bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.7rem 0.85rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease;
+}
+
+.card:has(button:not(:disabled)) { border-color: var(--accent-light); }
+
+/* Apparition d'une nouvelle card */
+.card-new { animation: cardSlideIn 0.35s ease forwards; }
+
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background: var(--accent-light);
+  border-radius: 10px;
+  padding: 5px;
+  transition: background 0.5s ease;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.card-possede {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 0.28rem;
+}
+
+.card button {
+  align-self: flex-start;
+  max-width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.36rem 0.8rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.77rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: normal;
+  word-break: break-word;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+
+.card button:hover:not(:disabled) {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.card button:active:not(:disabled) { transform: translateY(0); }
+
+.card button:disabled {
+  background: #e2dbd7;
+  color: #b0a59f;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== Bannière de palier ===== */
+.palier-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-110%);
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 0.6rem 2rem;
+  font-family: 'Fraunces', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  box-shadow: var(--shadow);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: transform 0.4s ease, opacity 0.4s ease, color 0.5s ease;
+}
+
+.palier-banner.visible {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ===== Floats "+N" ===== */
+#floats-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.float-text {
+  position: absolute;
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent-dark);
+  pointer-events: none;
+  animation: floatUp 0.75s ease forwards;
+  white-space: nowrap;
+  text-shadow: 0 1px 6px rgba(253, 250, 246, 0.8);
+  transition: color 0.5s ease;
+}
+
+@keyframes floatUp {
+  0%   { opacity: 1;   transform: translateY(0)     scale(1); }
+  60%  { opacity: 0.8; transform: translateY(-35px) scale(1.05); }
+  100% { opacity: 0;   transform: translateY(-65px) scale(0.85); }
+}
+
+/* ===== Responsive mobile (< 900 px) ===== */
+@media (max-width: 900px) {
+  body { height: auto; min-height: 100dvh; overflow: auto; }
+
+  .layout { height: auto; padding: 1rem; gap: 1rem; }
+
+  .grid { grid-template-columns: 1fr; flex: none; }
+
+  .panel-left { display: none; }
+
+  .center-col, .shop { overflow: visible; }
+
+  .click-zone { height: 240px; flex: none; }
+
+  .cake-button img { height: 190px; }
+}

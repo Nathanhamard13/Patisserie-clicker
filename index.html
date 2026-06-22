@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>La Pâtisserie Clicker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="floats-container"></div>
+
+  <!-- Bannière de changement de palier (glisse depuis le haut) -->
+  <div id="palier-banner" class="palier-banner" aria-live="polite">
+    <span id="palier-banner-text"></span>
+  </div>
+
+  <div class="layout">
+
+    <header>
+      <h1>La Pâtisserie</h1>
+    </header>
+
+    <div class="grid">
+
+      <!-- Panneau gauche : stats live -->
+      <aside class="panel-left">
+        <h3 class="panel-title">Statistiques</h3>
+        <ul class="stats-list">
+          <li class="stat-row">
+            <span class="stat-label">Par seconde</span>
+            <span class="stat-value" id="stat-mps">0</span>
+          </li>
+          <li class="stat-row">
+            <span class="stat-label">Par clic</span>
+            <span class="stat-value" id="stat-mpc">1</span>
+          </li>
+          <li class="stat-row">
+            <span class="stat-label">Total produit</span>
+            <span class="stat-value" id="stat-total">0</span>
+          </li>
+          <li class="stat-row">
+            <span class="stat-label">Clics manuels</span>
+            <span class="stat-value" id="stat-clics">0</span>
+          </li>
+          <li class="stat-row">
+            <span class="stat-label">Temps de jeu</span>
+            <span class="stat-value" id="stat-chrono">00:00</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Zone centrale : compteur + gâteau cliquable -->
+      <section class="center-col">
+
+        <div class="score-card">
+          <span class="score-label">Gâteaux</span>
+          <div id="affichage">0</div>
+          <span class="palier-label" id="palier-nom">Pâtisserie de quartier</span>
+        </div>
+
+        <div class="click-zone">
+          <!-- Gâteau principal cliquable (layer cake aquarelle)
+               Dimensions cibles : 260×260px, fond transparent
+               Style : illustration aquarelle douce, tons rose poudré / ivoire / pistache
+               Ambiance : pâtisserie artisanale française, joyeuse et appétissante -->
+          <button id="clic" class="cake-button" type="button" aria-label="Vendre un gâteau">
+            <img src="assets/img/gateaum.png" alt="Gâteau à cliquer" id="cake-img">
+          </button>
+          <!-- Les curseurs orbitaux sont injectés ici par JS -->
+        </div>
+
+      </section>
+
+      <!-- Boutique générée dynamiquement par JS depuis le tableau UPGRADES -->
+      <section class="shop">
+        <h2>Boutique</h2>
+        <div id="shop-list"></div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
