@@ -195,14 +195,13 @@ h1 {
   transition: color 0.5s ease;
 }
 
-/* Zone gâteau — remplit l'espace restant, accueille les curseurs orbitaux */
+/* Zone gâteau — colonne : scène du gâteau en haut, factory floor en bas */
 .click-zone {
   flex: 1;
   min-height: 0;
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
 }
 
 /* Bouton gâteau : transparent, aucun fond, aucune bordure */
@@ -293,108 +292,92 @@ h1 {
   transform: translate(105px, -26px) scale(0.78);
 }
 
-/* ===== Satellites (animations selon upgrades) ===== */
-.satellites {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: visible;
-}
-
-/* Usines — arrière-plan flouté, légèrement tremblant */
-.usine-sat {
-  position: absolute;
-  bottom: 0;
-  width: 120px;
-  height: auto;
-  opacity: 0.25;
-  filter: blur(2px);
-  transform-origin: center bottom;
-  z-index: 0;
-}
-
-.usine-sat.usine-shake { animation: usineShake 0.5s ease; }
-
-@keyframes usineShake {
-  0%, 100% { transform: translateX(0)    rotate(0); }
-  25%      { transform: translateX(-2px) rotate(-1deg); }
-  50%      { transform: translateX(2px)  rotate(1deg); }
-  75%      { transform: translateX(-2px) rotate(-1deg); }
-}
-
-/* Fours — bas droite + fumée qui monte */
-.four-wrap {
-  position: absolute;
-  right: 4px;
-  bottom: 4px;
+/* ===== Scène du gâteau (gâteau + curseurs orbitaux), en haut ===== */
+.cake-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* ===== Factory floor — rangées de satellites alignées, en bas ===== */
+.factory-floor {
+  flex-shrink: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  pointer-events: none;
   z-index: 1;
 }
 
-.four-sat { position: relative; width: 56px; }
-.four-sat img { display: block; width: 56px; height: auto; }
+.factory-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+  width: 100%;
+  min-height: 50px;
+}
+
+/* Une rangée vide ne réserve pas d'espace */
+.factory-row:empty { display: none; min-height: 0; }
+
+/* Items : taille de base 44px, peuvent rétrécir si la rangée déborde */
+.factory-row > * { flex: 0 1 44px; min-width: 20px; }
+
+.factory-row img {
+  width: 44px;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* Apprentis : léger bobbing vertical en boucle */
+.sat-apprenti { animation: satBob 2s ease-in-out infinite; }
+
+@keyframes satBob {
+  0%, 100% { transform: translateY(2px); }
+  50%      { transform: translateY(-2px); }
+}
+
+/* Fours : wrapper pour accueillir la fumée au-dessus */
+.sat-four { position: relative; }
+.sat-four img { width: 100%; }
 
 .smoke {
   position: absolute;
-  bottom: 72%;
-  width: 9px;
-  height: 9px;
+  bottom: 90%;
+  width: 8px;
+  height: 8px;
   background: rgba(180, 170, 165, 0.5);
   border-radius: 50%;
   animation: smokeRise 3s linear infinite;
 }
 
 @keyframes smokeRise {
-  0%   { opacity: 0;   transform: translateY(0)     scale(0.5); }
-  25%  { opacity: 0.6; }
-  100% { opacity: 0;   transform: translateY(-42px) scale(1.4); }
+  0%   { opacity: 0;    transform: translateY(0)     scale(0.5); }
+  25%  { opacity: 0.55; }
+  100% { opacity: 0;    transform: translateY(-30px) scale(1.3); }
 }
 
-/* Boulangeries — bas gauche */
-.boul-wrap {
-  position: absolute;
-  left: 4px;
-  bottom: 4px;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  z-index: 1;
-}
+/* Usines : nettes, 100% opaques, tremblement subtil périodique */
+.sat-usine { transform-origin: center bottom; }
+.sat-usine.usine-shake { animation: usineShake 0.5s ease; }
 
-.boulangerie-sat { display: block; width: 56px; height: auto; }
-
-/* Apprentis — orbite extérieure, sens anti-horaire */
-.apprenti-orbit {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-  z-index: 1;
-  animation: rotate-orbit-reverse 12s linear infinite;
-}
-
-@keyframes rotate-orbit-reverse {
-  from { transform: rotate(360deg); }
-  to   { transform: rotate(0deg); }
-}
-
-.apprenti-hand {
-  position: absolute;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  transform: translate(155px, -14px);
-  pointer-events: none;
-  transition: transform 0.08s ease;
-}
-
-.apprenti-hand.cursor-clicking {
-  transform: translate(155px, -14px) scale(0.8);
+@keyframes usineShake {
+  0%, 100% { transform: translateX(0)    rotate(0); }
+  25%      { transform: translateX(-2px) rotate(-1deg); }
+  50%      { transform: translateX(2px)  rotate(1deg); }
+  75%      { transform: translateX(-2px) rotate(-1deg); }
 }
 
 /* "+N" doré des boulangeries */
@@ -595,7 +578,9 @@ h1 {
 
   .center-col, .shop { overflow: visible; }
 
-  .click-zone { height: 240px; flex: none; }
+  .click-zone { height: auto; flex: none; }
+
+  .cake-stage { min-height: 240px; }
 
   .cake-button img { height: 190px; }
 }

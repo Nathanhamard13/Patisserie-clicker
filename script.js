@@ -5,11 +5,11 @@
 // ============================================================
 
 const PALIERS = [
-  { seuil: 0,       nom: "Pâtisserie de quartier", image: "assets/img/gateaum.png",          accent: "#c97b8f", accentDark: "#a85e72", accentLight: "#f5dde3", fond: "assets/img/fond-patisserie.png" },
-  { seuil: 1000,    nom: "Salon de thé",           image: "assets/img/gateau-palier2.png",    accent: "#7a9484", accentDark: "#5e7868", accentLight: "#d5e8e0", fond: "assets/img/fond-palier2.png"   },
-  { seuil: 10000,   nom: "Boulangerie réputée",    image: "assets/img/gateau-palier3.png",    accent: "#b8956a", accentDark: "#8f6e47", accentLight: "#f0e0cc", fond: "assets/img/fond-palier3.png"   },
-  { seuil: 100000,  nom: "Empire pâtissier",       image: "assets/img/gateau-palier4.png",    accent: "#8b3a4e", accentDark: "#6d2037", accentLight: "#f0c8d0", fond: "assets/img/fond-palier4.png"   },
-  { seuil: 1000000, nom: "Multinationale",         image: "assets/img/gateau-palier5.png",    accent: "#d4a84a", accentDark: "#a87d28", accentLight: "#f5e8c0", fond: "assets/img/fond-palier5.png"   },
+  { seuil: 0,       nom: "Pâtisserie de quartier", image: "assets/img/gateaum.png",          accent: "#c97b8f", accentDark: "#a85e72", accentLight: "#f5dde3", fond: "assets/img/fond-patisserie.jpg" },
+  { seuil: 1000,    nom: "Salon de thé",           image: "assets/img/gateau-palier2.png",    accent: "#7a9484", accentDark: "#5e7868", accentLight: "#d5e8e0", fond: "assets/img/fond-palier2.jpg"   },
+  { seuil: 10000,   nom: "Boulangerie réputée",    image: "assets/img/gateau-palier3.png",    accent: "#b8956a", accentDark: "#8f6e47", accentLight: "#f0e0cc", fond: "assets/img/fond-palier3.jpg"   },
+  { seuil: 100000,  nom: "Empire pâtissier",       image: "assets/img/gateau-palier4.png",    accent: "#8b3a4e", accentDark: "#6d2037", accentLight: "#f0c8d0", fond: "assets/img/fond-palier4.jpg"   },
+  { seuil: 1000000, nom: "Multinationale",         image: "assets/img/gateau-palier5.png",    accent: "#d4a84a", accentDark: "#a87d28", accentLight: "#f5e8c0", fond: "assets/img/fond-palier5.jpg"   },
 ];
 
 // Fond de secours si l'image d'un palier n'existe pas encore
@@ -284,7 +284,7 @@ function activerBonus(u) {
 // ============================================================
 
 function rebuildOrbitCursors(n) {
-  clickZone.querySelectorAll('.cursor-orbit').forEach(el => el.remove());
+  cakeStage.querySelectorAll('.cursor-orbit').forEach(el => el.remove());
 
   if (n === undefined) n = upgradeState['autoclic'];
   for (let i = 0; i < n; i++) {
@@ -299,106 +299,105 @@ function rebuildOrbitCursors(n) {
     img.alt = '';
 
     orbit.appendChild(img);
-    clickZone.appendChild(orbit);
+    cakeStage.appendChild(orbit);
   }
 }
 
 // ============================================================
-// SATELLITES — animations selon les upgrades achetées
-// Conteneur dédié + plafond global de 40 éléments visuels
-// (priorité : curseurs autoclic, puis upgrades de plus haut palier)
+// SATELLITES — refonte « factory floor »
+// Le gâteau (+ curseurs autoclic orbitaux) occupe le haut de la zone.
+// Toutes les autres upgrades passives sont alignées en rangées
+// thématiques dans un bandeau horizontal en bas.
+// Plafonds individuels par type, aucun plafond global.
 // ============================================================
 
-let satContainer  = null;
+let cakeStage    = null;   // englobe le gâteau + les curseurs orbitaux
+let factoryFloor = null;   // bandeau du bas
+const factoryRows = {};    // type → élément de rangée
 let usineEls       = [];
 let boulangerieEls = [];
 
 function initSatellites() {
-  satContainer = document.createElement('div');
-  satContainer.className = 'satellites';
-  // Inséré en premier pour rester sous le gâteau dans l'empilement
-  clickZone.insertBefore(satContainer, clickZone.firstChild);
+  // Scène du gâteau (haut, centrée) — on y déplace le bouton existant
+  cakeStage = document.createElement('div');
+  cakeStage.className = 'cake-stage';
+  clickZone.insertBefore(cakeStage, clickZone.firstChild);
+  cakeStage.appendChild(btnClic);
+
+  // Bandeau « factory floor » (bas) avec une rangée par type
+  factoryFloor = document.createElement('div');
+  factoryFloor.className = 'factory-floor';
+  ['apprenti', 'four', 'boulangerie', 'usine'].forEach(type => {
+    const row = document.createElement('div');
+    row.className = `factory-row factory-row-${type}`;
+    factoryFloor.appendChild(row);
+    factoryRows[type] = row;
+  });
+  clickZone.appendChild(factoryFloor);
 }
 
 function rebuildSatellites() {
-  // Plafonds individuels (visuels uniquement, le calcul MPS n'est pas affecté)
+  // Plafonds individuels (visuels uniquement — le calcul MPS n'est jamais affecté)
   const nCursors  = Math.min(upgradeState['autoclic'],    20);
   const nApprenti = Math.min(upgradeState['apprenti'],    15);
-  const nUsine    = Math.min(upgradeState['usine'],        3);
-  const nBoulang  = Math.min(upgradeState['boulangerie'],  4);
-  const nFour     = Math.min(upgradeState['four'],         5);
+  const nFour     = Math.min(upgradeState['four'],         8);
+  const nBoulang  = Math.min(upgradeState['boulangerie'],  8);
+  const nUsine    = Math.min(upgradeState['usine'],        5);
 
-  // --- Curseurs autoclic (orbite intérieure) ---
+  // --- Curseurs autoclic : orbite autour du gâteau (inchangé) ---
   rebuildOrbitCursors(nCursors);
 
-  // --- Apprentis (orbite extérieure, sens anti-horaire) ---
-  clickZone.querySelectorAll('.apprenti-orbit').forEach(el => el.remove());
-  for (let i = 0; i < nApprenti; i++) {
-    const orbit = document.createElement('div');
-    orbit.className = 'apprenti-orbit';
-    orbit.style.animationDelay = `-${(i * 12) / nApprenti}s`;
-
-    const img = document.createElement('img');
-    img.className = 'apprenti-hand';
-    img.src = 'assets/img/icone-apprenti.png';
-    img.alt = '';
-
-    orbit.appendChild(img);
-    clickZone.appendChild(orbit);
-  }
-
-  // --- Conteneur usines / fours / boulangeries ---
-  satContainer.innerHTML = '';
+  // --- Réinitialisation des rangées ---
   usineEls       = [];
   boulangerieEls = [];
+  Object.values(factoryRows).forEach(row => { row.innerHTML = ''; });
 
-  // Usines : arrière-plan flouté, réparties horizontalement
+  // Apprentis : alignés, léger bobbing vertical décalé
+  for (let i = 0; i < nApprenti; i++) {
+    const img = document.createElement('img');
+    img.className = 'sat-apprenti';
+    img.src = 'assets/img/icone-apprenti.png';
+    img.alt = '';
+    img.style.animationDelay = `${(i % 6) * 0.2}s`;
+    factoryRows.apprenti.appendChild(img);
+  }
+
+  // Fours : alignés, avec petite fumée animée au-dessus
+  for (let i = 0; i < nFour; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'sat-four';
+    const img = document.createElement('img');
+    img.src = 'assets/img/icone-four.png';
+    img.alt = '';
+    wrap.appendChild(img);
+    for (let s = 0; s < 2; s++) {
+      const sm = document.createElement('span');
+      sm.className = 'smoke';
+      sm.style.left = `${32 + s * 24}%`;
+      sm.style.animationDelay = `${s * 1.2}s`;
+      wrap.appendChild(sm);
+    }
+    factoryRows.four.appendChild(wrap);
+  }
+
+  // Boulangeries : alignées, ka-ching « +N » au-dessus de chaque caisse
+  for (let i = 0; i < nBoulang; i++) {
+    const img = document.createElement('img');
+    img.className = 'sat-boulangerie';
+    img.src = 'assets/img/icone-boulangerie.png';
+    img.alt = '';
+    factoryRows.boulangerie.appendChild(img);
+    boulangerieEls.push(img);
+  }
+
+  // Usines : nettes, 100% opaques, tremblement subtil périodique
   for (let i = 0; i < nUsine; i++) {
-    const u = document.createElement('img');
-    u.className = 'usine-sat';
-    u.src = 'assets/img/icone-usine.png';
-    u.alt = '';
-    u.style.left = `${nUsine === 1 ? 40 : 12 + i * (66 / (nUsine - 1))}%`;
-    satContainer.appendChild(u);
-    usineEls.push(u);
-  }
-
-  // Fours : en bas à droite, avec fumée
-  if (nFour > 0) {
-    const wrap = document.createElement('div');
-    wrap.className = 'four-wrap';
-    for (let i = 0; i < nFour; i++) {
-      const f = document.createElement('div');
-      f.className = 'four-sat';
-      const img = document.createElement('img');
-      img.src = 'assets/img/icone-four.png';
-      img.alt = '';
-      f.appendChild(img);
-      for (let s = 0; s < 3; s++) {
-        const sm = document.createElement('span');
-        sm.className = 'smoke';
-        sm.style.left = `${22 + s * 20}%`;
-        sm.style.animationDelay = `${s}s`;
-        f.appendChild(sm);
-      }
-      wrap.appendChild(f);
-    }
-    satContainer.appendChild(wrap);
-  }
-
-  // Boulangeries : en bas à gauche
-  if (nBoulang > 0) {
-    const wrap = document.createElement('div');
-    wrap.className = 'boul-wrap';
-    for (let i = 0; i < nBoulang; i++) {
-      const b = document.createElement('img');
-      b.className = 'boulangerie-sat';
-      b.src = 'assets/img/icone-boulangerie.png';
-      b.alt = '';
-      wrap.appendChild(b);
-      boulangerieEls.push(b);
-    }
-    satContainer.appendChild(wrap);
+    const img = document.createElement('img');
+    img.className = 'sat-usine';
+    img.src = 'assets/img/icone-usine.png';
+    img.alt = '';
+    factoryRows.usine.appendChild(img);
+    usineEls.push(img);
   }
 }
 
@@ -536,9 +535,9 @@ setInterval(() => {
   checkNewUpgrades();
   updateShopButtons();
 
-  // Animations toutes les secondes (curseurs + apprentis + ka-ching)
+  // Animations toutes les secondes (curseurs autoclic + ka-ching boulangeries)
   if (tickCount % 10 === 0) {
-    document.querySelectorAll('.cursor-hand, .apprenti-hand').forEach(c => {
+    document.querySelectorAll('.cursor-hand').forEach(c => {
       c.classList.add('cursor-clicking');
       setTimeout(() => c.classList.remove('cursor-clicking'), 150);
     });
