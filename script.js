@@ -321,13 +321,12 @@ function initSatellites() {
 }
 
 function rebuildSatellites() {
-  // --- Répartition du budget global (40), du plus prioritaire au moins ---
-  let budget = 40;
-  const nCursors  = Math.min(upgradeState['autoclic'],    budget); budget -= nCursors;
-  const nUsine    = Math.min(upgradeState['usine'],    3, budget); budget -= nUsine;
-  const nBoulang  = Math.min(upgradeState['boulangerie'], 4, budget); budget -= nBoulang;
-  const nFour     = Math.min(upgradeState['four'],     5, budget); budget -= nFour;
-  const nApprenti = Math.min(upgradeState['apprenti'], 15, budget); budget -= nApprenti;
+  // Plafonds individuels (visuels uniquement, le calcul MPS n'est pas affecté)
+  const nCursors  = Math.min(upgradeState['autoclic'],    20);
+  const nApprenti = Math.min(upgradeState['apprenti'],    15);
+  const nUsine    = Math.min(upgradeState['usine'],        3);
+  const nBoulang  = Math.min(upgradeState['boulangerie'],  4);
+  const nFour     = Math.min(upgradeState['four'],         5);
 
   // --- Curseurs autoclic (orbite intérieure) ---
   rebuildOrbitCursors(nCursors);
